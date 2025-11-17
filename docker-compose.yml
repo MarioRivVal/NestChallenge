@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: countries_hex_db
+    restart: always
+    environment:
+      POSTGRES_USER: mario
+      POSTGRES_PASSWORD: mario
+      POSTGRES_DB: countries_hex
+    ports:
+      - '5432:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
