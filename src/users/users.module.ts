@@ -6,6 +6,7 @@ import { UserRepositoryTypeOrm } from './infrastructure/persistence/user.typeorm
 import { UserEntity } from './infrastructure/persistence/user.entity';
 import { USER_REPOSITORY } from './domain/user.repository';
 import { UsersController } from './presentation/users.controller';
+import { CustomLogger } from 'src/common/logger/custom-logger.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity])],
@@ -13,6 +14,7 @@ import { UsersController } from './presentation/users.controller';
   controllers: [UsersController],
   providers: [
     UsersService,
+    CustomLogger,
     { provide: USER_REPOSITORY, useClass: UserRepositoryTypeOrm },
   ],
 })

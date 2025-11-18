@@ -1,4 +1,3 @@
-// src/config/swagger.config.ts
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
@@ -9,7 +8,7 @@ export function setupSwagger(app: INestApplication) {
       'API del desafío: users + countries con arquitectura hexagonal',
     )
     .setVersion('1.0')
-    .addBearerAuth() // lo usaremos cuando metamos JWT
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
