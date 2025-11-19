@@ -2,6 +2,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, MinLength, Matches } from 'class-validator';
 
+/**
+ * DTO de entrada para crear un usuario.
+ * - Define y valida los campos que el cliente debe enviar en el body del POST /users
+ */
+
 export class CreateUserDto {
   @ApiProperty({ example: 'mario', description: 'User name' })
   @IsNotEmpty({ message: 'Username is required' })

@@ -7,6 +7,13 @@ import { UserEntity } from './infrastructure/persistence/user.entity';
 import { USER_REPOSITORY } from './domain/user.repository';
 import { UsersController } from './presentation/users.controller';
 import { CustomLogger } from 'src/common/logger/custom-logger.service';
+import { passwordHasher } from 'src/common/security/password-hasher.service';
+
+/**
+ * Módulo del contexto de Users.
+ * - Registra controller, service y repositorio
+ * - Conecta el puerto de dominio USER_REPOSITORY con la implementación TypeORM
+ */
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity])],
@@ -15,6 +22,7 @@ import { CustomLogger } from 'src/common/logger/custom-logger.service';
   providers: [
     UsersService,
     CustomLogger,
+    passwordHasher,
     { provide: USER_REPOSITORY, useClass: UserRepositoryTypeOrm },
   ],
 })

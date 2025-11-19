@@ -4,6 +4,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { getTypeOrmConfig } from './config/typeorm.config';
 
+/**
+ * Módulo raíz de la aplicación.
+ * - Carga configuración global
+ * - Configura TypeORM
+ * - Registra los módulos de la app (ej: UsersModule)
+ */
+
 @Module({
   imports: [
     ConfigModule.forRoot({

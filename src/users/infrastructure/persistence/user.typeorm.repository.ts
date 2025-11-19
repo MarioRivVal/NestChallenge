@@ -5,6 +5,11 @@ import { UserEntity } from './user.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/users/domain/user';
 
+/**
+ * Implementación de IUserRepository usando TypeORM y Postgres.
+ * - Traduce entre User (dominio) y UserEntity (infraestructura)
+ * - Usa Repository<UserEntity> internamente
+ */
 @Injectable()
 export class UserRepositoryTypeOrm implements IUserRepository {
   constructor(
@@ -17,7 +22,7 @@ export class UserRepositoryTypeOrm implements IUserRepository {
       entity.id,
       entity.username,
       entity.email,
-      entity.password,
+      entity.passwordHash,
     );
     return user;
   }
@@ -27,7 +32,7 @@ export class UserRepositoryTypeOrm implements IUserRepository {
     entity.id = user.id;
     entity.username = user.username;
     entity.email = user.email;
-    entity.password = user.password;
+    entity.passwordHash = user.passwordHash;
 
     return entity;
   }
@@ -46,16 +51,5 @@ export class UserRepositoryTypeOrm implements IUserRepository {
     const entity = this.toEntity(user);
     const saved = await this.repo.save(entity);
     return this.toDomain(saved);
-  }
-
-  async update(user: User): Promise<User> {
-    const entity = this.toEntity(user);
-    const updated = await this.repo.save(entity);
-
-    return this.toDomain(updated);
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.repo.delete(id);
   }
 }

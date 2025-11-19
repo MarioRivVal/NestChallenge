@@ -18,6 +18,7 @@ import {
   ApiParam,
   ApiNotFoundResponse,
   ApiBadRequestResponse,
+  ApiConflictResponse,
 } from '@nestjs/swagger';
 
 @ApiTags('Users')
@@ -34,23 +35,15 @@ export class UsersController {
   }
 
   // -------------------------------------------------------------- //
-  @Get()
-  @ApiOkResponse({
-    description: 'List of all users',
-    type: UserResponseDto,
-    isArray: true,
-  })
-  async getAll(): Promise<UserResponseDto[]> {
-    const users = await this.usersService.getAllUsers();
 
-    return users.map((u) => this.toResponseDto(u));
-  }
-  // -------------------------------------------------------------- //
   @Post()
   @ApiBody({ type: CreateUserDto })
   @ApiCreatedResponse({
     description: 'User successfully created',
     type: UserResponseDto,
+  })
+  @ApiConflictResponse({
+    description: 'Email already exists',
   })
   async create(@Body() body: CreateUserDto): Promise<UserResponseDto> {
     const { username, email, password } = body;
@@ -61,6 +54,20 @@ export class UsersController {
       password,
     });
     return this.toResponseDto(user);
+  }
+
+  // -------------------------------------------------------------- //
+
+  @Get()
+  @ApiOkResponse({
+    description: 'List of all users',
+    type: UserResponseDto,
+    isArray: true,
+  })
+  async getAll(): Promise<UserResponseDto[]> {
+    const users = await this.usersService.getAllUsers();
+
+    return users.map((u) => this.toResponseDto(u));
   }
 
   // -------------------------------------------------------------- //
