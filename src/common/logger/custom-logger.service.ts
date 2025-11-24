@@ -1,4 +1,4 @@
-import { ConsoleLogger, Injectable, Scope } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 
 /**
  * Logger personalizado basado en el logger de Nest.
@@ -6,5 +6,5 @@ import { ConsoleLogger, Injectable, Scope } from '@nestjs/common';
  * - Centraliza el formato de logs de la aplicación
  */
 
-@Injectable({ scope: Scope.TRANSIENT })
+@Injectable()
 export class CustomLogger extends ConsoleLogger {}

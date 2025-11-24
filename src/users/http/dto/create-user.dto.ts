@@ -8,11 +8,11 @@ import { IsEmail, IsNotEmpty, MinLength, Matches } from 'class-validator';
  */
 
 export class CreateUserDto {
-  @ApiProperty({ example: 'mario', description: 'User name' })
+  @ApiProperty({ example: 'mario' })
   @IsNotEmpty({ message: 'Username is required' })
   username: string;
 
-  @ApiProperty({ example: 'mario@example.com', description: 'User email' })
+  @ApiProperty({ example: 'mario@example.com' })
   @IsEmail({}, { message: 'Invalid email format' })
   email: string;
 

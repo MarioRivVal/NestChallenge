@@ -37,6 +37,12 @@ export class UserRepositoryTypeOrm implements IUserRepository {
     return entity;
   }
 
+  async save(user: User): Promise<User> {
+    const entity = this.toEntity(user);
+    const saved = await this.repo.save(entity);
+    return this.toDomain(saved);
+  }
+
   async findAll(): Promise<User[]> {
     const entities = await this.repo.find();
     return entities.map((e) => this.toDomain(e));
@@ -47,9 +53,12 @@ export class UserRepositoryTypeOrm implements IUserRepository {
     return entity ? this.toDomain(entity) : null;
   }
 
-  async save(user: User): Promise<User> {
-    const entity = this.toEntity(user);
-    const saved = await this.repo.save(entity);
-    return this.toDomain(saved);
+  async findByEmail(email: string): Promise<User | null> {
+    const entity = await this.repo.findOne({ where: { email } });
+    return entity ? this.toDomain(entity) : null;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.repo.delete(id);
   }
 }

@@ -87,4 +87,70 @@ export class UsersService {
   }
 
   // -------------------------------------------------------------- //
+
+  async updateUser(params: {
+    id: string;
+    username?: string;
+    email?: string;
+    password?: string;
+  }): Promise<User> {
+    const { id, username, email, password } = params;
+
+    this.logger.log(`Updating user with id: ${id}`);
+
+    const user = await this.userRepository.findById(id);
+
+    if (!user) {
+      this.logger.error(`User with id: ${id} NOT FOUND for update`);
+      throw new NotFoundException('User not found');
+    }
+
+    if (username !== undefined) {
+      user.username = username;
+    }
+
+    if (email !== undefined) {
+      user.email = email;
+    }
+
+    if (password !== undefined) {
+      const passwordHash = await this.passwordHasher.hash(password);
+      user.passwordHash = passwordHash;
+    }
+
+    try {
+      const saved = this.userRepository.save(user);
+      this.logger.log(`User with id: ${id} UPDATED`);
+      return saved;
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (error.code === '23505') {
+        this.logger.warn(
+          `Email already exists: ${params.email} (unique constraint)`,
+        );
+        throw new ConflictException('Email already exists');
+      }
+
+      this.logger.error(`Unexpected error creating user: ${String(error)}`);
+      throw new InternalServerErrorException(
+        'Error creating user. Please try again later.',
+      );
+    }
+  }
+
+  // -------------------------------------------------------------- //
+
+  async deleteUser(id: string): Promise<void> {
+    this.logger.log(`Deleting user with id: ${id}`);
+
+    const user = await this.userRepository.findById(id);
+
+    if (!user) {
+      this.logger.error(`User with id: ${id} NOT FOUND`);
+      throw new NotFoundException('User NOT FOUND');
+    }
+
+    await this.userRepository.delete(id);
+    this.logger.log('User DELETED');
+  }
 }
