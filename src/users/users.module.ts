@@ -5,7 +5,7 @@ import { UsersService } from './application/users.service';
 import { UserRepositoryTypeOrm } from './infrastructure/persistence/user.typeorm.repository';
 import { UserEntity } from './infrastructure/persistence/user.entity';
 import { USER_REPOSITORY } from './domain/user.repository';
-import { UsersController } from './http/users.controller';
+import { UsersController } from './infrastructure/users.controller';
 import { passwordHasher } from 'src/common/security/password-hasher.service';
 
 /**

@@ -1,4 +1,3 @@
-// src/auth/config/jwt.config.ts
 import { ConfigService } from '@nestjs/config';
 import { JwtModuleOptions } from '@nestjs/jwt';
 

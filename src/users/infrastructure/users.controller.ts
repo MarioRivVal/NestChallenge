@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,7 +24,13 @@ import {
   ApiBadRequestResponse,
   ApiConflictResponse,
   ApiNoContentResponse,
+  ApiBearerAuth,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import type { CurrentUserData } from 'src/auth/decorators/current-user.decorator';
+import { CustomLogger } from 'src/common/logger/custom-logger.service';
 
 /**
  * Controller HTTP para el contexto de Users.
@@ -31,9 +38,15 @@ import {
  * - Traduce entre HTTP (DTOs) y dominio (User)
  */
 @ApiTags('Users')
+@ApiBearerAuth()
 @Controller()
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly logger: CustomLogger,
+  ) {
+    this.logger.setContext(UsersController.name);
+  }
 
   private toResponseDto(user: User): UserResponseDto {
     return {
@@ -76,12 +89,17 @@ export class UsersController {
    * - Si no hay usuarios devuelve un array vacio
    */
   @Get('users')
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiOkResponse({
     description: 'List of all users',
     type: UserResponseDto,
     isArray: true,
   })
-  async getAll(): Promise<UserResponseDto[]> {
+  async getAll(
+    @CurrentUser() currentUser: CurrentUserData,
+  ): Promise<UserResponseDto[]> {
+    this.logger.log(currentUser);
     const users = await this.usersService.getAllUsers();
 
     return users.map((u) => this.toResponseDto(u));
@@ -93,7 +111,6 @@ export class UsersController {
    * - Devuelve el usuario sin la clave hasheada
    */
 
-  @Get('user/:id')
   @ApiParam({
     name: 'id',
     description: 'User ID',
@@ -105,9 +122,13 @@ export class UsersController {
   })
   @ApiNotFoundResponse({ description: ' User not found' })
   @ApiBadRequestResponse({ description: 'Invalid UUID format' })
+  @UseGuards(JwtAuthGuard)
+  @Get('user/:id')
   async getById(
     @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser() currentUser: CurrentUserData,
   ): Promise<UserResponseDto> {
+    this.logger.log(currentUser);
     const user = await this.usersService.getUserById(id);
     return this.toResponseDto(user);
   }
@@ -118,7 +139,6 @@ export class UsersController {
    * - Todos los datos enviados son opcionales
    * - Devuelve el usuario editado sin la clave hasheada
    */
-  @Patch('user/:id')
   @ApiParam({
     name: 'id',
     description: 'User ID',
@@ -133,10 +153,14 @@ export class UsersController {
   })
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiConflictResponse({ description: 'Email already exists' })
+  @UseGuards(JwtAuthGuard)
+  @Patch('user/:id')
   async update(
     @Body() body: UpdateUserDto,
     @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser() currentUser: CurrentUserData,
   ): Promise<UserResponseDto> {
+    this.logger.log(currentUser);
     const user = await this.usersService.updateUser({
       id,
       username: body.username,
@@ -152,7 +176,6 @@ export class UsersController {
    * Elimina un usuario, seleccionado por ID
    * - No devuelve nada, solo un mensaje de OK
    */
-  @Delete('user/:id')
   @ApiParam({
     name: 'id',
     description: 'User ID',
@@ -161,7 +184,32 @@ export class UsersController {
   @ApiNoContentResponse({ description: 'User deleted' })
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiBadRequestResponse({ description: 'Invalid UUID format' })
-  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+  @UseGuards(JwtAuthGuard)
+  @Delete('user/:id')
+  async delete(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser() currentUser: CurrentUserData,
+  ): Promise<void> {
+    this.logger.log(currentUser);
     return this.usersService.deleteUser(id);
+  }
+
+  // -------------------------------------------------------------- //
+  // NUEVO: GET /user/me (protegido) — usa el decorador para devolver el contexto
+
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({
+    description: 'Current logged user info (from JWT)',
+    schema: {
+      example: {
+        userId: '550e8400-e29b-41d4-a716-446655440000',
+        username: 'mario',
+        email: 'mario@example.com',
+      },
+    },
+  })
+  @Get('me')
+  getMe(@CurrentUser() currentUser: CurrentUserData): CurrentUserData {
+    return currentUser;
   }
 }
