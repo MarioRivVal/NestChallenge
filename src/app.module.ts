@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { getTypeOrmConfig } from './config/typeorm.config';
 import { LoggerModule } from './common/logger/logger.module';
 import { AuthModule } from './auth/auth.module';
+import { CountryModule } from './country/countries.module';
 
 /**
  * Módulo raíz de la aplicación.
@@ -27,6 +28,7 @@ import { AuthModule } from './auth/auth.module';
 
     UsersModule,
     AuthModule,
+    CountryModule,
   ],
 })
 export class AppModule {}
